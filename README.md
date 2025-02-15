@@ -8,7 +8,7 @@ For it to work it needs two environment variables:
 
 - `CF_API_KEY` - generate one here: <https://authors-old.curseforge.com/account/api-tokens>
 - `CF_PROJECT_ID` - see the right column of your project's webpage on CurseForge
-	- the script will scan TOC files for the `X-Curse-Project-ID` field if this is not provided
+  - if this is not provided the script will attempt to scan TOC files at the base of the repository for the `X-Curse-Project-ID` field and use its value
 
 ## Assumptions
 
