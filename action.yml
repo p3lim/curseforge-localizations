@@ -1,0 +1,10 @@
+name: CurseForge Localizations
+description: Uploads localization strings found in Lua files to CurseForge
+branding:
+  icon: type
+  color: yellow
+runs:
+  using: composite
+  steps:
+    - run: $GITHUB_ACTION_PATH/action.sh
+      shell: bash
