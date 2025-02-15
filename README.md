@@ -25,7 +25,7 @@ The script has a few assumptions in the way it works:
 ## Example workflow
 
 ```yaml
-name: Import localization strings to CurseForge
+name: Upload localization strings to CurseForge
 
 on:
   push:
