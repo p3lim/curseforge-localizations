@@ -35,7 +35,7 @@ on:
       - '**'
 
 jobs:
-  template:
+  upload:
     runs-on: ubuntu-latest
     steps:
       - name: Clone project
