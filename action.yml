@@ -6,5 +6,5 @@ branding:
 runs:
   using: composite
   steps:
-    - run: $GITHUB_ACTION_PATH/action.sh
+    - run: $GITHUB_ACTION_PATH/update.sh
       shell: bash
