@@ -19,8 +19,6 @@ The script has a few assumptions in the way it works:
 - all strings you want to upload are defined in Lua files using the AceLocale format, e.g;
 	- `L["This is an example"]` or
 	- `L['This is an example']`
-- you don't keep any already translated strings in your project
-	- e.g. it is assumed you use substitutions from a packager, so all your localization files are empty
 
 ## Example workflow
 
