@@ -51,4 +51,5 @@ jobs:
         uses: p3lim/curseforge-localizations@v1
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
+          HANDLE_MISSING: DeletePhrase # optional
 ```
