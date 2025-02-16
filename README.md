@@ -2,7 +2,7 @@
 
 A small shell script to manage localization strings for World of Warcraft AddOns when using [CurseForge's localization feature](https://support.curseforge.com/en/support/solutions/articles/9000197356-project-localization).
 
-It will (recursively) scan Lua files for text matching the [AceLocale](https://www.wowace.com/projects/ace3/pages/api/ace-locale-3-0) format (i.e. `L["An example"]` or `L['An example']`), then upload them to CurseForge. In essence it'll keep the strings used in the project code in-sync with CurseForge. It's a perfect companion to [localization substitution](https://github.com/BigWigsMods/packager/wiki/Localization-Substitution) in packagers.
+It will (recursively) scan Lua files for text matching the [AceLocale](https://www.wowace.com/projects/ace3/pages/api/ace-locale-3-0) format (i.e. `L["An example"]`), then upload them to CurseForge. In essence it'll keep the strings used in the project code in-sync with CurseForge. It's a perfect companion to [localization substitution](https://github.com/BigWigsMods/packager/wiki/Localization-Substitution) in packagers.
 
 Using AceLocale in your project is not required, the structure it defines has become the default that many libraries/addons use, and AceLocale is the most common way to use it.
 
