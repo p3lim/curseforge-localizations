@@ -36,7 +36,7 @@ if [ -n "$HANDLE_MISSING" ]; then
       ;;
   esac
 else
-  metadata+=("\"missing-phrase-handling\": \"DeletePhrase\"")
+  metadata+=("\"missing-phrase-handling\": \"DoNothing\"")
 fi
 
 # join metadata
