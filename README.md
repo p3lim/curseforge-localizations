@@ -6,7 +6,7 @@ It will (recursively) scan Lua files for text matching the [AceLocale](https://w
 
 Using AceLocale in your project is not required, the structure it defines has become the default that many libraries/addons use, and AceLocale is the most common way to use it.
 
-The script uses the [CurseForge Upload API](https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-api), and thus requires authentication with it.
+The script uses the [CurseForge Upload API](https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-api), which requires authentication (see below).
 
 For it to work it needs two environment variables:
 
