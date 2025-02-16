@@ -39,6 +39,10 @@ else
   metadata+=("language: \"enUS\"")
 fi
 
+if [ -n "$NAMESPACE" ]; then
+  metadata+=("namespace: \"$NAMESPACE\"")
+fi
+
 if [ -n "$HANDLE_MISSING" ]; then
   case "$HANDLE_MISSING" in
     DeletePhrase|DeleteIfTranslationsOnlyExistForSelectedLanguage|DeleteIfNoTranslations|DoNothing)

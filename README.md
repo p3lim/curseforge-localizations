@@ -29,6 +29,7 @@ Additional environment variables that adjust how it runs:
   - `ruRU`
   - `zhCN`
   - `zhTW`
+- `NAMESPACE` - (advanced) if you're using this then you know what you're doing
 
 ## Assumptions
 
