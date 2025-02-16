@@ -3,7 +3,7 @@
 # define variables
 declare -A strings
 regex="L\[[\"']([^]]+)[\"']\]"
-metadata=()
+options=()
 
 # parse options
 if [ -z "$CF_API_KEY" ]; then
@@ -28,7 +28,7 @@ fi
 if [ -n "$BASE_LANG" ]; then
   case "$BASE_LANG" in
     enUS|deDE|esES|esMX|frFR|itIT|koKR|ptBR|ruRU|zhCN|zhTW)
-      metadata+=("language: \"$BASE_LANG\"")
+      options+=("language: \"$BASE_LANG\"")
       ;;
     *)
       echo "Invalid value for optional env 'BASE_LANG'"
@@ -36,17 +36,17 @@ if [ -n "$BASE_LANG" ]; then
       ;;
   esac
 else
-  metadata+=("language: \"enUS\"")
+  options+=("language: \"enUS\"")
 fi
 
 if [ -n "$NAMESPACE" ]; then
-  metadata+=("namespace: \"$NAMESPACE\"")
+  options+=("namespace: \"$NAMESPACE\"")
 fi
 
 if [ -n "$HANDLE_MISSING" ]; then
   case "$HANDLE_MISSING" in
     DeletePhrase|DeleteIfTranslationsOnlyExistForSelectedLanguage|DeleteIfNoTranslations|DoNothing)
-      metadata+=("\"missing-phrase-handling\": \"$HANDLE_MISSING\"")
+      options+=("\"missing-phrase-handling\": \"$HANDLE_MISSING\"")
       ;;
     *)
       echo "Invalid value for optional env 'HANDLE_MISSING'"
@@ -54,11 +54,11 @@ if [ -n "$HANDLE_MISSING" ]; then
       ;;
   esac
 else
-  metadata+=("\"missing-phrase-handling\": \"DoNothing\"")
+  options+=("\"missing-phrase-handling\": \"DoNothing\"")
 fi
 
 # join metadata
-metadata="$(printf "%s, " "${metadata[@]}")"
+metadata="$(printf "%s, " "${options[@]}")"
 metadata="${metadata::-2}"
 
 # create temporary files
