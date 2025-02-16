@@ -18,7 +18,7 @@ if [ -z "$CF_PROJECT_ID" ]; then
     if [[ $line =~ $regexID ]]; then
       CF_PROJECT_ID="${BASH_REMATCH[1]}"
     fi
-  done < <(grep -oP "$regexID" -- *.toc)
+  done < <(grep -oPir --include='*.toc' "$regexID")
 fi
 if [ -z "$CF_PROJECT_ID" ]; then
   echo "Missing required env 'CF_PROJECT_ID'"
