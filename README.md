@@ -31,6 +31,8 @@ The script has a few assumptions in the way it works:
 - all strings you want to upload are defined in Lua files using the AceLocale format, e.g;
 	- `L["This is an example"]` or
 	- `L['This is an example']`
+- it is assumed that the keys of the `L` object are the english translations
+  - if you're using tokens instead of phrases as the key you can set the actual enUS translation on CurseForge
 
 ## Example workflow
 
