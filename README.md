@@ -31,6 +31,8 @@ Additional environment variables that adjust how it runs:
 
 ## Example workflow
 
+The script can be used as an [action](https://docs.github.com/en/actions) in a GitHub [workflow](https://docs.github.com/en/actions/writing-workflows/about-workflows);
+
 ```yaml
 name: Upload localization strings to CurseForge
 
