@@ -3,7 +3,7 @@
 # define variables
 declare -A strings
 regex="L\[[\"']([^]]+)[\"']\]"
-metadata=("language: \"enUS\"")
+metadata=()
 
 # parse options
 if [ -z "$CF_API_KEY" ]; then
@@ -23,6 +23,20 @@ fi
 if [ -z "$CF_PROJECT_ID" ]; then
   echo "Missing required env 'CF_PROJECT_ID'"
   exit 1
+fi
+
+if [ -n "$BASE_LANG" ]; then
+  case "$BASE_LANG" in
+    enUS|deDE|esES|esMX|frFR|itIT|koKR|ptBR|ruRU|zhCN|zhTW)
+      metadata+=("language: \"$BASE_LANG\"")
+      ;;
+    *)
+      echo "Invalid value for optional env 'BASE_LANG'"
+      exit 1
+      ;;
+  esac
+else
+  metadata+=("language: \"enUS\"")
 fi
 
 if [ -n "$HANDLE_MISSING" ]; then

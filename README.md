@@ -17,6 +17,18 @@ Additional environment variables that adjust how it runs:
   - `DeleteIfTranslationsOnlyExistForSelectedLanguage`
   - `DeleteIfNoTranslations`
   - `DoNothing` (default)
+- `BASE_LANG` - the base language of all strings in the project's code, one of:
+  - `enUS` - the default
+  - `deDE`
+  - `esES`
+  - `esMX`
+  - `frFR`
+  - `itIT`
+  - `koKR`
+  - `ptBR`
+  - `ruRU`
+  - `zhCN`
+  - `zhTW`
 
 ## Assumptions
 
