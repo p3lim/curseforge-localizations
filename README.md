@@ -15,11 +15,11 @@ For it to work it needs two environment variables:
 
 Additional environment variables that adjust how it runs:
 
-- `HANDLE_MISSING` - what to do when an existing string on CurseForge doesn't exist in the Lua files any more, one of:
+- `HANDLE_MISSING` - when an existing string on CurseForge doesn't exist in the Lua files, one of:
+  - `DoNothing` (default)
   - `DeletePhrase`
   - `DeleteIfTranslationsOnlyExistForSelectedLanguage`
   - `DeleteIfNoTranslations`
-  - `DoNothing` (default)
 - `BASE_LANG` - the base language of all strings in the project's code, one of:
   - `enUS` - the default
   - `deDE`
