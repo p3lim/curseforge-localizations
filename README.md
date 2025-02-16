@@ -4,6 +4,9 @@ A small shell script to manage localization strings in World of Warcraft AddOns.
 
 It will (recursively) scan Lua files in the directory it's run in for strings that matches the standard AceLocale format, then upload that to CurseForge.
 
+It uses the CurseForge Upload API documented here:  
+<https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-api>
+
 For it to work it needs two environment variables:
 
 - `CF_API_KEY` - generate one here: <https://authors-old.curseforge.com/account/api-tokens>
