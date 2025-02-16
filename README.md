@@ -12,6 +12,14 @@ For it to work it needs two environment variables:
 - `CF_PROJECT_ID` - see the right column of your project's webpage on CurseForge
   - if this is not provided the script will attempt to scan TOC files at the base of the repository for the `X-Curse-Project-ID` field and use its value
 
+Additional environment variables that adjust how it runs:
+
+- `HANDLE_MISSING` - what to do when an existing string on CurseForge doesn't exist in the Lua files any more, one of:
+  - `DeletePhrase` (default)
+  - `DeleteIfTranslationsOnlyExistForSelectedLanguage`
+  - `DeleteIfNoTranslations`
+  - `DoNothing`
+
 ## Assumptions
 
 The script has a few assumptions in the way it works:

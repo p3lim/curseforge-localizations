@@ -1,10 +1,16 @@
 #!/bin/bash
 
-# check env
+# define variables
+declare -A strings
+regex="L\[[\"']([^]]+)[\"']\]"
+metadata=("language: \"enUS\"")
+
+# parse options
 if [ -z "$CF_API_KEY" ]; then
   echo "Missing required env 'CF_API_KEY'"
   exit 1
 fi
+
 if [ -z "$CF_PROJECT_ID" ]; then
   # attempt to read project ID from TOC file
   regexID='## X-Curse-Project-ID: (.*?)$'
@@ -19,14 +25,28 @@ if [ -z "$CF_PROJECT_ID" ]; then
   exit 1
 fi
 
+if [ -n "$HANDLE_MISSING" ]; then
+  case "$HANDLE_MISSING" in
+    DeletePhrase|DeleteIfTranslationsOnlyExistForSelectedLanguage|DeleteIfNoTranslations|DoNothing)
+      metadata+=("\"missing-phrase-handling\": \"$HANDLE_MISSING\"")
+      ;;
+    *)
+      echo "Invalid value for optional env 'HANDLE_MISSING'"
+      exit 1
+      ;;
+  esac
+else
+  metadata+=("\"missing-phrase-handling\": \"DeletePhrase\"")
+fi
+
+# join metadata
+metadata="$(printf "%s, " "${metadata[@]}")"
+metadata="${metadata::-2}"
+
 # create temporary files
 translations="$(mktemp)"
 http_out="$(mktemp)"
 trap 'rm -f "$translations" "$http_out"' EXIT
-
-# define variables
-declare -A strings
-regex="L\[[\"']([^]]+)[\"']\]"
 
 # scrape files for translation strings
 while read -r file; do
@@ -44,7 +64,7 @@ done
 # https://support.curseforge.com/en/support/solutions/articles/9000197321-curseforge-api
 res=$(curl -sSL -X POST -w "%{http_code}" -o "$http_out" \
   -H "X-Api-Token: $CF_API_KEY" \
-  -F 'metadata={ language: "enUS", "missing-phrase-handling": "DeletePhrase" }' \
+  -F "metadata={ $metadata }" \
   -F "localizations=<$translations" \
   "https://legacy.curseforge.com/api/projects/$CF_PROJECT_ID/localization/import"
 ) || {
