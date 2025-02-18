@@ -10,6 +10,7 @@ import textwrap
 import requests
 
 url = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
+valid_langs = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
 valid_handlers = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
 pattern = re.compile(r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?')
 
@@ -21,6 +22,7 @@ def parse_arguments():
   required.add_argument('-i', '--id', help='project ID on CurseForge')
 
   optional = parser.add_argument_group('optional arguments:')
+  optional.add_argument('-l', '--lang', help=f'base language of strings (default = {valid_langs[0]})', default=valid_langs[0], metavar='OPT')
   optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {valid_handlers[0]})', default=valid_handlers[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
@@ -58,9 +60,16 @@ def validate_arguments(args):
     sys.exit(1)
 
 def get_metadata(args):
-  metadata = {'language': 'enUS'}
+  metadata = {}
   if args.namespace:
     metadata['namespace'] = args.namespace
+
+  if args.lang in valid_langs:
+    metadata['language'] = args.lang
+  else:
+    print('error: invalid language defined')
+    print(f'       must be one of: {valid_langs}') # TODO: pretty up this output
+    sys.exit(1)
 
   if args.missing in valid_handlers:
     metadata['missing-phrase-handling'] = args.missing

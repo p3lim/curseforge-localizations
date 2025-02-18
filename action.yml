@@ -6,7 +6,10 @@ branding:
 inputs:
   project_id:
     description: Project ID on CurseForge
-  missing_handler:
+  base_lang:
+    description: Base language of strings
+    default: enUS
+  handle_missing:
     description: How to handle missing phrases
     default: DoNothing
   namespace:
@@ -17,6 +20,7 @@ runs:
     - run: |
         python3 $GITHUB_ACTION_PATH/update.py \
           --id "${{ inputs.project_id }}" \
-          --missing "${{ inputs.missing_handler }}" \
+          --lang "${{ inputs.base_lang }}" \
+          --missing "${{ inputs.handle_missing }}" \
           --namespace "${{ inputs.namespace }}"
       shell: bash
