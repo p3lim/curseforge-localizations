@@ -25,6 +25,7 @@ def parse_arguments():
   optional.add_argument('-l', '--lang', help=f'base language of strings (default = {valid_langs[0]})', default=valid_langs[0], metavar='OPT')
   optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {valid_handlers[0]})', default=valid_handlers[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
+  optional.add_argument('-e', '--exclude', help='pattern of files and/or directories to ignore', action='append', metavar='OPT')
   optional.add_argument('-d', '--dry', help='dry-run, print strings instead of uploading', action='store_true')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
 
@@ -83,7 +84,20 @@ def get_metadata(args):
 
 def get_strings(args):
   strings = {}
+
+  if len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
+    # stupid github doesn't support lists
+    args.exclude = args.exclude[0].splitlines()
+
+  excludes = []
+  for path in args.exclude or []:
+    excludes.append(glob.translate(path))
+
+  exclude_pattern = f'({ ")|(".join(excludes) })'
   for path in glob.glob('**/*.lua', recursive=True):
+    if len(excludes) and re.match(exclude_pattern, path):
+      continue
+
     with open(path, 'r') as file:
       for line in file:
         match = pattern.search(line)

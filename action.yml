@@ -14,6 +14,8 @@ inputs:
     default: DoNothing
   namespace:
     description: Namespace to upload to
+  exclude:
+    description: List of file patterns to exclude
 runs:
   using: composite
   steps:
@@ -22,5 +24,6 @@ runs:
           --id "${{ inputs.project_id }}" \
           --lang "${{ inputs.base_lang }}" \
           --missing "${{ inputs.handle_missing }}" \
-          --namespace "${{ inputs.namespace }}"
+          --namespace "${{ inputs.namespace }}" \
+          --exclude "${{ inputs.exclude }}"
       shell: bash
