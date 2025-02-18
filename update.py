@@ -41,9 +41,6 @@ def validate_arguments(args):
   if not args.key:
     if 'CF_API_KEY' in os.environ:
       args.key = os.environ['CF_API_KEY']
-    else:
-      print('error: missing API key')
-      sys.exit(1)
   else:
     if os.path.isfile(args.key):
       with open(args.key, 'r') as file:
@@ -58,9 +55,6 @@ def validate_arguments(args):
           if match:
             args.id = match.group(1)
             break
-  if not args.id:
-    print('error: missing project ID')
-    sys.exit(1)
 
   if len(args.pattern) == 0:
     # stupid github
@@ -122,6 +116,14 @@ def get_strings(args):
   return strings
 
 def upload_strings(args, strings):
+  if not args.key:
+    print('error: missing API key')
+    sys.exit(1)
+
+  if not args.id:
+    print('error: missing project ID')
+    sys.exit(1)
+
   res = requests.post(
     url % args.id,
     headers = {
