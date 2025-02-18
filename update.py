@@ -35,9 +35,6 @@ def parse_arguments():
     parser.print_help()
     sys.exit(0)
 
-  return args
-
-def validate_arguments(args):
   if not args.key:
     if 'CF_API_KEY' in os.environ:
       args.key = os.environ['CF_API_KEY']
@@ -59,6 +56,8 @@ def validate_arguments(args):
   if len(args.pattern) == 0:
     # stupid github
     args.pattern = DEFAULT_PATTERN
+
+  return args
 
 def get_metadata(args):
   metadata = {}
@@ -153,8 +152,6 @@ def upload_strings(args, strings):
 
 if __name__ == '__main__':
   args = parse_arguments()
-
-  validate_arguments(args)
   strings = get_strings(args)
 
   if args.dry:
