@@ -69,14 +69,14 @@ def get_metadata(args):
     metadata['language'] = args.lang
   else:
     print('error: invalid language defined')
-    print(f'       must be one of: {valid_langs}') # TODO: pretty up this output
+    print(f'       must be one of: {json.dumps(valid_langs)[1:-1]}')
     sys.exit(1)
 
   if args.missing in valid_handlers:
     metadata['missing-phrase-handling'] = args.missing
   else:
     print('error: invalid missing phrase handler')
-    print(f'       must be one of: {valid_handlers}') # TODO: pretty up this output
+    print(f'       must be one of: {json.dumps(valid_handlers)[1:-1]}')
     sys.exit(1)
 
   return metadata
