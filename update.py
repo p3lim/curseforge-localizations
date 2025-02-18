@@ -9,10 +9,10 @@ import argparse
 import textwrap
 import requests
 
-url = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
-valid_langs = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
-valid_handlers = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
-default_pattern = r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?'
+CF_URL = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
+VALID_LANGS = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
+VALID_HANDLERS = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
+DEFAULT_PATTERN = r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?'
 
 def parse_arguments():
   parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
@@ -22,11 +22,11 @@ def parse_arguments():
   required.add_argument('-i', '--id', help='project ID on CurseForge')
 
   optional = parser.add_argument_group('optional arguments:')
-  optional.add_argument('-l', '--lang', help=f'base language of strings (default = {valid_langs[0]})', default=valid_langs[0], metavar='OPT')
-  optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {valid_handlers[0]})', default=valid_handlers[0], metavar='OPT')
+  optional.add_argument('-l', '--lang', help=f'base language of strings (default = {VALID_LANGS[0]})', default=VALID_LANGS[0], metavar='OPT')
+  optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {VALID_HANDLERS[0]})', default=VALID_HANDLERS[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
   optional.add_argument('-e', '--exclude', help='pattern of files and/or directories to ignore', action='append', metavar='OPT')
-  optional.add_argument('-p', '--pattern', help='regex pattern used to find strings', default=default_pattern, metavar='OPT')
+  optional.add_argument('-p', '--pattern', help='regex pattern used to find strings', default=DEFAULT_PATTERN, metavar='OPT')
   optional.add_argument('-d', '--dry', help='dry-run, print strings instead of uploading', action='store_true')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
 
@@ -58,25 +58,25 @@ def validate_arguments(args):
 
   if len(args.pattern) == 0:
     # stupid github
-    args.pattern = default_pattern
+    args.pattern = DEFAULT_PATTERN
 
 def get_metadata(args):
   metadata = {}
   if args.namespace:
     metadata['namespace'] = args.namespace
 
-  if args.lang in valid_langs:
+  if args.lang in VALID_LANGS:
     metadata['language'] = args.lang
   else:
     print('error: invalid language defined')
-    print(f'       must be one of: {json.dumps(valid_langs)[1:-1]}')
+    print(f'       must be one of: {json.dumps(VALID_LANGS)[1:-1]}')
     sys.exit(1)
 
-  if args.missing in valid_handlers:
+  if args.missing in VALID_HANDLERS:
     metadata['missing-phrase-handling'] = args.missing
   else:
     print('error: invalid missing phrase handler')
-    print(f'       must be one of: {json.dumps(valid_handlers)[1:-1]}')
+    print(f'       must be one of: {json.dumps(VALID_HANDLERS)[1:-1]}')
     sys.exit(1)
 
   return metadata
@@ -85,17 +85,18 @@ def get_strings(args):
   strings = {}
   pattern = re.compile(args.pattern)
 
-  if args.exclude and len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
-    # stupid github doesn't support lists
-    args.exclude = args.exclude[0].splitlines()
-
   excludes = []
-  for path in args.exclude or []:
-    excludes.append(glob.translate(path))
+  if args.exclude:
+    if len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
+      # stupid github doesn't support lists
+      args.exclude = args.exclude[0].splitlines()
+
+    for path in args.exclude:
+      excludes.append(glob.translate(path))
 
   exclude_pattern = f'({ ")|(".join(excludes) })'
   for path in glob.glob('**/*.lua', recursive=True):
-    if len(excludes) and re.match(exclude_pattern, path):
+    if excludes and re.match(exclude_pattern, path):
       continue
 
     with open(path, 'r') as file:
@@ -125,7 +126,7 @@ def upload_strings(args, strings):
     sys.exit(1)
 
   res = requests.post(
-    url % args.id,
+    CF_URL % args.id,
     headers = {
       'X-Api-Token': args.key
     },
