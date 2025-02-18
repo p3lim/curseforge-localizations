@@ -12,7 +12,7 @@ import requests
 url = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
 valid_langs = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
 valid_handlers = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
-pattern = re.compile(r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?')
+default_pattern = r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?'
 
 def parse_arguments():
   parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
@@ -26,6 +26,7 @@ def parse_arguments():
   optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {valid_handlers[0]})', default=valid_handlers[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
   optional.add_argument('-e', '--exclude', help='pattern of files and/or directories to ignore', action='append', metavar='OPT')
+  optional.add_argument('-p', '--pattern', help='regex pattern used to find strings', default=default_pattern, metavar='OPT')
   optional.add_argument('-d', '--dry', help='dry-run, print strings instead of uploading', action='store_true')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
 
@@ -61,6 +62,10 @@ def validate_arguments(args):
     print('error: missing project ID')
     sys.exit(1)
 
+  if len(args.pattern) == 0:
+    # stupid github
+    args.pattern = default_pattern
+
 def get_metadata(args):
   metadata = {}
   if args.namespace:
@@ -84,6 +89,7 @@ def get_metadata(args):
 
 def get_strings(args):
   strings = {}
+  pattern = re.compile(args.pattern)
 
   if len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
     # stupid github doesn't support lists

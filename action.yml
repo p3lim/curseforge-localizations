@@ -16,6 +16,8 @@ inputs:
     description: Namespace to upload to
   exclude:
     description: List of file patterns to exclude
+  string_pattern:
+    description: Custom regex pattern to use
 runs:
   using: composite
   steps:
@@ -25,5 +27,6 @@ runs:
           --lang "${{ inputs.base_lang }}" \
           --missing "${{ inputs.handle_missing }}" \
           --namespace "${{ inputs.namespace }}" \
+          --pattern "${{ inputs.string_pattern }}" \
           --exclude "${{ inputs.exclude }}"
       shell: bash

@@ -11,7 +11,7 @@ The script uses the [CurseForge Upload API](https://support.curseforge.com/en/su
 ## Usage
 
 ```
-usage: update.py [-k KEY] [-i ID] [-l OPT] [-m OPT] [-n OPT] [-e OPT] [-d] [-h]
+usage: update.py [-k KEY] [-i ID] [-l OPT] [-m OPT] [-n OPT] [-e OPT] [-p OPT] [-d] [-h]
 
 required arguments::
   -k, --key KEY        API key or path to file that contains the key for CurseForge,
@@ -23,6 +23,7 @@ optional arguments::
   -m, --missing OPT    how to handle missing phrases (default = DoNothing)
   -n, --namespace OPT  namespace to upload to
   -e, --exclude OPT    pattern of files and/or directories to ignore
+  -p, --pattern OPT    regex pattern used to find strings
   -d, --dry            dry-run, print strings instead of uploading
   -h, --help           show this help message
 ```
