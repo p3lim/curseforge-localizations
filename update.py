@@ -25,6 +25,7 @@ def parse_arguments():
   optional.add_argument('-l', '--lang', help=f'base language of strings (default = {valid_langs[0]})', default=valid_langs[0], metavar='OPT')
   optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {valid_handlers[0]})', default=valid_handlers[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
+  optional.add_argument('-d', '--dry', help='dry-run, print strings instead of uploading', action='store_true')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
 
   args = parser.parse_args()
@@ -131,4 +132,10 @@ if __name__ == '__main__':
   args = parse_arguments()
 
   validate_arguments(args)
-  upload_strings(args, get_strings(args))
+  strings = get_strings(args)
+
+  if args.dry:
+    for key, value in strings.items():
+      print(f'L[{json.dumps(key)}] = {json.dumps(value)}')
+  else:
+    upload_strings(args, strings)
