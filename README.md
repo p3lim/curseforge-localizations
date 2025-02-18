@@ -1,6 +1,6 @@
 # CurseForge Localizations
 
-A small shell script to manage localization strings for World of Warcraft AddOns when using [CurseForge's localization feature](https://support.curseforge.com/en/support/solutions/articles/9000197356-project-localization).
+A small script to manage localization strings for World of Warcraft AddOns when using [CurseForge's localization feature](https://support.curseforge.com/en/support/solutions/articles/9000197356-project-localization).
 
 It will (recursively) scan Lua files for text matching the [AceLocale](https://www.wowace.com/projects/ace3/pages/api/ace-locale-3-0) format (e.g. `L["An example"]`), then upload them to CurseForge. In essence it'll keep the strings used in the project code in-sync with CurseForge. It's a perfect companion to [localization substitution](https://github.com/BigWigsMods/packager/wiki/Localization-Substitution) in packagers.
 
@@ -10,24 +10,37 @@ The script uses the [CurseForge Upload API](https://support.curseforge.com/en/su
 
 ## Usage
 
-For it to work it needs two environment variables:
+```
+usage: update.py [-k KEY] [-i ID] [-m OPT] [-n OPT] [-h]
 
-- `CF_API_KEY` - generate one here: <https://authors-old.curseforge.com/account/api-tokens>
-- `CF_PROJECT_ID` - see the right column of your project's webpage on CurseForge
-  - if not provided the script will attempt to scan TOC files for the `X-Curse-Project-ID` field and use its value
+required arguments::
+  -k, --key KEY        API key or path to file that contains the key for CurseForge,
+                       can also be defined as CF_API_KEY environment variable
+  -i, --id ID          project ID on CurseForge
+
+optional arguments::
+  -m, --missing OPT    how to handle missing phrases (default = DoNothing)
+  -n, --namespace OPT  namespace to upload to
+  -h, --help           show this help message
+```
+
+For the tool to work correctly (i.e. upload strings) it needs at minimum two pieces of information:
+
+- it needs the API key to talk to the CurseForge API
+  - you can generate one here: <https://authors-old.curseforge.com/account/api-tokens>
+  - the script can read this from a file, an environment variable, or as a plain string argument
+- it needs the project ID on CurseForge
+  - see the right column of your project's webpage on CurseForge
+  - if this is not provided as an argument the script will attempt to find it from the `X-Curse-Project-ID` field in nearby TOC files, as it's commonly used/defined that was by other tools
 
 And you obviously need to enable the Localization feature on CurseForge for your project;
 
 > `https://legacy.curseforge.com/wow/addons/YOUR_PROJECT/settings/general`
 
-Additional environment variables that adjust how it runs:
+The additional options should be pretty straight-forward, although some are quite advanced.  
+Please refer to the CurseForge support article for some of them.
 
-- `HANDLE_MISSING` - when an existing string on CurseForge doesn't exist in the Lua files, one of:
-  - `DoNothing` (default)
-  - `DeletePhrase` (recommended to keep things clean)
-  - `DeleteIfTranslationsOnlyExistForSelectedLanguage`
-  - `DeleteIfNoTranslations`
-- `NAMESPACE` - (advanced) if you're using this then you know what you're doing
+If you have any questions on how to use the script, feel free to open a [discussion](https://github.com/p3lim/curseforge-localizations/discussions).
 
 ## Example workflow
 
@@ -52,7 +65,8 @@ jobs:
 
       - name: Upload localizations
         uses: p3lim/curseforge-localizations@v1
+        with:
+          handle_missing: DeletePhrase # optional
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
-          HANDLE_MISSING: DeletePhrase # optional
 ```

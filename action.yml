@@ -3,8 +3,20 @@ description: Uploads localization strings found in Lua files to CurseForge
 branding:
   icon: type
   color: yellow
+inputs:
+  project_id:
+    description: Project ID on CurseForge
+  missing_handler:
+    description: How to handle missing phrases
+    default: DoNothing
+  namespace:
+    description: Namespace to upload to
 runs:
   using: composite
   steps:
-    - run: $GITHUB_ACTION_PATH/update.sh
+    - run: |
+        python3 $GITHUB_ACTION_PATH/update.py \
+          --id "${{ inputs.project_id }}" \
+          --missing "${{ inputs.missing_handler }}" \
+          --namespace "${{ inputs.namespace }}"
       shell: bash
