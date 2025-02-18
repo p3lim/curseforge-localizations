@@ -85,7 +85,7 @@ def get_strings(args):
   strings = {}
   pattern = re.compile(args.pattern)
 
-  if len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
+  if args.exclude and len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
     # stupid github doesn't support lists
     args.exclude = args.exclude[0].splitlines()
 
