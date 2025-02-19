@@ -91,7 +91,7 @@ def get_strings(args):
       args.exclude = args.exclude[0].splitlines()
 
     for path in args.exclude:
-      excludes.append(glob.translate(path))
+      excludes.append(glob.translate(path, recursive=True))
 
   exclude_pattern = f'({ ")|(".join(excludes) })'
   for path in glob.glob('**/*.lua', recursive=True):
