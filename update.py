@@ -100,9 +100,11 @@ def get_strings(args):
 
     with open(path, 'r') as file:
       for line in file:
-        match = pattern.search(line)
-        if match:
+        for match in pattern.finditer(line):
           (key, value) = match.groups()
+          key = key.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
+          if value:
+            value = value.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
 
           # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
           # will interpret that as "the key is the value", but if we find the value for the key then
