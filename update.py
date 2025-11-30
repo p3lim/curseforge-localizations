@@ -80,8 +80,8 @@ def get_metadata(args):
 
   return metadata
 
-def unescape(str):
-  return str.replace('\\n', '\n').replace('\\t', '\t')
+def unescape(m):
+  return m.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
 
 def get_strings(args):
   strings = {}
