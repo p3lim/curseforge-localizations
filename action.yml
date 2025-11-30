@@ -21,6 +21,9 @@ inputs:
 runs:
   using: composite
   steps:
+    - uses: actions/setup-python@v6
+      with:
+        python-version: '3.13'
     - run: |
         python3 $GITHUB_ACTION_PATH/update.py \
           --id "${{ inputs.project_id }}" \

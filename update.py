@@ -9,6 +9,12 @@ import argparse
 import textwrap
 import requests
 
+MIN_PYTHON_VERSION = (3, 13)
+
+if sys.version_info < MIN_PYTHON_VERSION:
+  sys.stderr.write(f'Error: this script requires Python {MIN_PYTHON_VERSION[0]}.{MIN_PYTHON_VERSION[1]} or later\n')
+  sys.exit(1)
+
 CF_URL = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
 VALID_LANGS = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
 VALID_HANDLERS = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
