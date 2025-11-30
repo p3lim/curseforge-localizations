@@ -32,7 +32,7 @@ runs:
       shell: bash
       env:
         PYTHON_PATH: ${{ steps.python.outputs.python-path }}
-      run: pip install -r "${{ github.action_path }}/requirements.txt"
+      run: pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
     - name: Run script
       shell: bash
       run: |
