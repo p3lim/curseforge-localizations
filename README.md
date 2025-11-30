@@ -68,7 +68,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Upload localizations
-        uses: p3lim/curseforge-localizations@v1
+        uses: p3lim/curseforge-localizations@v2
         with:
           handle_missing: DeletePhrase # optional
           exclude: | # optional
