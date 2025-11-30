@@ -23,16 +23,15 @@ runs:
   steps:
     - name: Install Python 3.13+
       uses: actions/setup-python@v6
-      id: python
       with:
         python-version: '>=3.13'
-        update-environment: false
-        cache: 'pip'
-        cache-dependency-path: ${{ github.action_path }}/requirements.txt
+    - name: Install dependencies
+      shell: bash
+      run: pip install -r "${{ github.action_path }}/requirements.txt"
     - name: Run script
       shell: bash
       run: |
-        ${{ steps.python.outputs.python-path }} "${{ github.action_path }}/update.py" \
+        python3 "${{ github.action_path }}/update.py" \
           --id "${{ inputs.project_id }}" \
           --lang "${{ inputs.base_lang }}" \
           --missing "${{ inputs.handle_missing }}" \
