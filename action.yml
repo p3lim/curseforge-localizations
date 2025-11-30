@@ -30,7 +30,9 @@ runs:
         cache: 'pip'
     - name: Install dependencies
       shell: bash
-      run: ${{ steps.python.outputs.python-path }} -m pip install -r "${{ github.action_path }}/requirements.txt"
+      env:
+        PYTHON_PATH: ${{ steps.python.outputs.python-path }}
+      run: pip install -r "${{ github.action_path }}/requirements.txt"
     - name: Run script
       shell: bash
       run: |
