@@ -98,20 +98,18 @@ def get_strings(args):
     if excludes and re.match(exclude_pattern, path):
       continue
 
-    with open(path, 'r') as file:
-      for line in file:
-        match = pattern.search(line)
-        if match:
-          (key, value) = match.groups()
+    with open(path, 'r+') as file:
+      for match in pattern.finditer(file.read(), re.DOTALL):
+        (key, value) = match.groups()
 
-          # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
-          # will interpret that as "the key is the value", but if we find the value for the key then
-          # store that instead
-          if key in strings:
-            if strings[key] is True:
-              strings[key] = value or True
-          else:
+        # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
+        # will interpret that as "the key is the value", but if we find the value for the key then
+        # store that instead
+        if key in strings:
+          if strings[key] is True:
             strings[key] = value or True
+        else:
+          strings[key] = value or True
 
   return strings
 
