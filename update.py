@@ -80,6 +80,9 @@ def get_metadata(args):
 
   return metadata
 
+def unescape(str):
+  return str.replace('\\n', '\n').replace('\\t', '\t')
+
 def get_strings(args):
   strings = {}
   pattern = re.compile(args.pattern)
@@ -101,6 +104,10 @@ def get_strings(args):
     with open(path, 'r+') as file:
       for match in pattern.finditer(file.read(), re.DOTALL):
         (key, value) = match.groups()
+
+        key = unescape(key)
+        if value:
+          value = unescape(value)
 
         # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
         # will interpret that as "the key is the value", but if we find the value for the key then
