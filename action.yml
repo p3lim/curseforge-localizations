@@ -27,11 +27,8 @@ runs:
       with:
         python-version: '>=3.13'
         update-environment: false
-    - name: Install dependencies
-      shell: bash
-      env:
-        PYTHON_PATH: ${{ steps.python.outputs.python-path }}
-      run: pip install -r "$GITHUB_ACTION_PATH/requirements.txt"
+        cache: 'pip'
+        cache-dependency-path: ${{ github.action_path }}/requirements.txt
     - name: Run script
       shell: bash
       run: |
