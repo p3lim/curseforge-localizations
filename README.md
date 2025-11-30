@@ -10,6 +10,8 @@ The script uses the [CurseForge Upload API](https://support.curseforge.com/en/su
 
 ## Usage
 
+> This tool requires Python >=3.13 and [requests](https://pypi.org/project/requests/).
+
 ```
 usage: update.py [-k KEY] [-i ID] [-l OPT] [-m OPT] [-n OPT] [-e OPT] [-p OPT] [-d] [-h]
 
@@ -59,6 +61,9 @@ on:
       - master
     tags-ignore:
       - '**'
+
+permissions:
+  contents: read # required to install python dependencies
 
 jobs:
   upload:

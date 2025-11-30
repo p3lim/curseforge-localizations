@@ -21,15 +21,23 @@ inputs:
 runs:
   using: composite
   steps:
-    - uses: actions/setup-python@v6
+    - name: Install Python 3.13+
+      uses: actions/setup-python@v6
+      id: python
       with:
-        python-version: '3.13'
-    - run: |
-        python3 $GITHUB_ACTION_PATH/update.py \
+        python-version: '>=3.13'
+        update-environment: false
+        cache: 'pip'
+    - name: Install dependencies
+      shell: bash
+      run: ${{ steps.python.outputs.python-path }} -m pip install -r "${{ github.action_path }}/requirements.txt"
+    - name: Run script
+      shell: bash
+      run: |
+        ${{ steps.python.outputs.python-path }} "${{ github.action_path }}/update.py" \
           --id "${{ inputs.project_id }}" \
           --lang "${{ inputs.base_lang }}" \
           --missing "${{ inputs.handle_missing }}" \
           --namespace "${{ inputs.namespace }}" \
           --pattern "${{ inputs.string_pattern }}" \
           --exclude "${{ inputs.exclude }}"
-      shell: bash
