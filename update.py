@@ -12,7 +12,22 @@ import requests
 CF_URL = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
 VALID_LANGS = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
 VALID_HANDLERS = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
-DEFAULT_PATTERN = r'L\[["\']([^]]+)["\']\](?:\s*=\s*["\']([^"\']+)["\'])?'
+DEFAULT_PATTERN = r'''
+L\[( # match within L[]
+  "(?:\\.|[^"])*" # strings in quotation marks, ignoring escaped quotation marks
+  |'(?:\\.|[^'])*' # strings in apostrophes, ignoring escaped apostrophes
+)\]
+(?:\s*=\s*(?:( # match strings being declared by L[]
+  "(?:\\.|[^"])*" # strings in quotation marks
+  |'(?:\\.|[^'])*' # strings in apostrophes
+  |\[\[(?:[^.]*)\]\] # strings brackets
+  |\[=\[(?:[^.]*)\]=\] # strings in nested brackets
+  |\[==\[(?:[^.]*)\]==\]
+  |\[===\[(?:[^.]*)\]===\]
+  |\[====\[(?:[^.]*)\]====\]
+  |\[=====\[(?:[^.]*)\]=====\]
+)))?
+'''
 
 def parse_arguments():
   parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
@@ -80,12 +95,32 @@ def get_metadata(args):
 
   return metadata
 
-def unescape(m):
-  return m.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
+def count_leading_char(s, char):
+  count = 0
+  for c in s:
+    if c == char:
+      count += 1
+    else:
+      break
+  return count
+
+def unquote(s):
+  if s[0] == '"' or s[0] == "'":
+    return s[1:-1]
+  elif s[1] == '[':
+    return s[2:-2]
+  elif s[1] == '=':
+    # nested brackets, determine size
+    nested = count_leading_char(s[1:], '=') + 2
+    return s[nested:-nested]
+  return s
+
+def unescape(s):
+  return s.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
 
 def get_strings(args):
   strings = {}
-  pattern = re.compile(args.pattern)
+  pattern = re.compile(args.pattern, re.VERBOSE)
 
   excludes = []
   if args.exclude:
@@ -102,12 +137,12 @@ def get_strings(args):
       continue
 
     with open(path, 'r+') as file:
-      for match in pattern.finditer(file.read(), re.DOTALL):
+      for match in pattern.finditer(file.read()):
         (key, value) = match.groups()
 
-        key = unescape(key)
+        key = unescape(unquote(key))
         if value:
-          value = unescape(value)
+          value = unescape(unquote(value))
 
         # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
         # will interpret that as "the key is the value", but if we find the value for the key then
