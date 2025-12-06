@@ -8,6 +8,8 @@ import glob
 import argparse
 import textwrap
 import requests
+from luaparser import ast
+from luaparser import astnodes
 
 MIN_PYTHON_VERSION = (3, 13)
 
@@ -16,24 +18,26 @@ if sys.version_info < MIN_PYTHON_VERSION:
   sys.exit(1)
 
 CF_URL = 'https://legacy.curseforge.com/api/projects/%s/localization/import'
-VALID_LANGS = ('enUS', 'deDE', 'esES', 'esMX', 'frFR', 'itIT', 'koKR', 'ptBR', 'ruRU', 'zhCN', 'zhTW')
-VALID_HANDLERS = ('DoNothing', 'DeletePhrase', 'DeleteIfTranslationsOnlyExistForSelectedLanguage', 'DeleteIfNoTranslations')
-DEFAULT_PATTERN = r'''
-L\[( # match within L[]
-  "(?:\\.|[^"])*" # strings in quotation marks, ignoring escaped quotation marks
-  |'(?:\\.|[^'])*' # strings in apostrophes, ignoring escaped apostrophes
-)\]
-(?:\s*=\s*(?:( # match strings being declared by L[]
-  "(?:\\.|[^"])*" # strings in quotation marks
-  |'(?:\\.|[^'])*' # strings in apostrophes
-  |\[\[(?:[^.]*)\]\] # strings brackets
-  |\[=\[(?:[^.]*)\]=\] # strings in nested brackets
-  |\[==\[(?:[^.]*)\]==\]
-  |\[===\[(?:[^.]*)\]===\]
-  |\[====\[(?:[^.]*)\]====\]
-  |\[=====\[(?:[^.]*)\]=====\]
-)))?
-'''
+VALID_LANGS = (
+  'enUS',
+  'deDE',
+  'esES',
+  'esMX',
+  'frFR',
+  'itIT',
+  'koKR',
+  'ptBR',
+  'ruRU',
+  'zhCN',
+  'zhTW',
+)
+VALID_HANDLERS = (
+  'DoNothing',
+  'DeletePhrase',
+  'DeleteIfTranslationsOnlyExistForSelectedLanguage',
+  'DeleteIfNoTranslations',
+)
+
 
 def parse_arguments():
   parser = argparse.ArgumentParser(add_help=False, formatter_class=argparse.RawTextHelpFormatter)
@@ -47,7 +51,6 @@ def parse_arguments():
   optional.add_argument('-m', '--missing', help=f'how to handle missing phrases (default = {VALID_HANDLERS[0]})', default=VALID_HANDLERS[0], metavar='OPT')
   optional.add_argument('-n', '--namespace', help='namespace to upload to', metavar='OPT')
   optional.add_argument('-e', '--exclude', help='pattern of files and/or directories to ignore', action='append', metavar='OPT')
-  optional.add_argument('-p', '--pattern', help='regex pattern used to find strings', default=DEFAULT_PATTERN, metavar='OPT')
   optional.add_argument('-d', '--dry', help='dry-run, print strings instead of uploading', action='store_true')
   optional.add_argument('-h', '--help', help='show this help message', action='store_true')
 
@@ -65,7 +68,7 @@ def parse_arguments():
         args.key = file.readline().rstrip()
 
   if not args.id:
-    toc_pattern = re.compile(r'## X-Curse-Project-ID: (.+)')
+    toc_pattern = re.compile(r'^## X-Curse-Project-ID: (.+)$')
     for path in glob.glob('**/*.toc', recursive=True):
       with open(path, 'r') as file:
         for line in file:
@@ -74,11 +77,8 @@ def parse_arguments():
             args.id = match.group(1)
             break
 
-  if len(args.pattern) == 0:
-    # stupid github
-    args.pattern = DEFAULT_PATTERN
-
   return args
+
 
 def get_metadata(args):
   metadata = {}
@@ -101,65 +101,56 @@ def get_metadata(args):
 
   return metadata
 
-def count_leading_char(s, char):
-  count = 0
-  for c in s:
-    if c == char:
-      count += 1
-    else:
-      break
-  return count
 
-def unquote(s):
-  if s[0] == '"' or s[0] == "'":
-    return s[1:-1]
-  elif s[1] == '[':
-    return s[2:-2]
-  elif s[1] == '=':
-    # nested brackets, determine size
-    nested = count_leading_char(s[1:], '=') + 2
-    return s[nested:-nested]
-  return s
+def escape(s):
+  if isinstance(s, bool):
+    return str(s).lower() # lua syntax
+  return f'"{s.replace("\\'", "'").replace("\n", "\\n").replace("\t", "\\t")}"'
 
-def unescape(s):
-  return s.replace('\\n', '\n').replace('\\t', '\t').replace('\\"', '"').replace("\\'", "'")
 
 def get_strings(args):
-  strings = {}
-  pattern = re.compile(args.pattern, re.VERBOSE)
-
   excludes = []
   if args.exclude:
-    if len(args.exclude) == 1 and args.exclude[0].count('\n') > 0:
-      # stupid github doesn't support lists
-      args.exclude = args.exclude[0].splitlines()
-
     for path in args.exclude:
       excludes.append(glob.translate(path, recursive=True))
 
-  exclude_pattern = f'({ ")|(".join(excludes) })'
+  string_keys = []
+  string_pairs = {}
+
+  # traverse files
+  exclude_pattern = f'({")|(".join(excludes)})'
   for path in glob.glob('**/*.lua', recursive=True):
     if excludes and re.match(exclude_pattern, path):
       continue
 
-    with open(path, 'r+') as file:
-      for match in pattern.finditer(file.read()):
-        (key, value) = match.groups()
+    # read file
+    with open(path, 'r') as file:
+      # traverse lua tree, finding the table "L" when it's indexed or a value is assigned
+      tree = ast.parse(file.read())
+      for node in ast.walk(tree):
+        if isinstance(node, astnodes.Index):
+          if hasattr(node.value, 'id') and node.value.id == 'L':
+            string_keys.append(node.idx.raw)
+        elif isinstance(node, astnodes.Assign):
+          if (
+            hasattr(node.targets[0], 'value')
+            and hasattr(node.targets[0].value, 'id')
+            and node.targets[0].value.id == 'L'
+          ):
+            if isinstance(node.values[0], astnodes.String):
+              string_pairs[node.targets[0].idx.raw] = node.values[0].raw
 
-        key = unescape(unquote(key))
-        if value:
-          value = unescape(unquote(value))
+  for key in string_keys:
+    if key not in string_pairs.keys():
+      string_pairs[key] = True
 
-        # if there's no value store "True" in its place, as the AceLocale format CurseForge follows
-        # will interpret that as "the key is the value", but if we find the value for the key then
-        # store that instead
-        if key in strings:
-          if strings[key] is True:
-            strings[key] = value or True
-        else:
-          strings[key] = value or True
+  # convert to lua
+  strings = []
+  for key, value in string_pairs.items():
+    strings.append(f'L[{escape(key)}] = {escape(value)}')
 
   return strings
+
 
 def upload_strings(args, strings):
   if not args.key:
@@ -177,8 +168,8 @@ def upload_strings(args, strings):
     },
     files = {
       'metadata': (None, json.dumps(get_metadata(args))),
-      'localizations': (None, '\n'.join([f'L[{json.dumps(k)}] = {json.dumps(v)}' for k,v in strings.items()]))
-    }
+      'localizations': (None, '\n'.join(strings)),
+    },
   )
 
   if res.status_code == 403:
@@ -189,19 +180,20 @@ def upload_strings(args, strings):
 
   data = json.loads(res.content)
   if res.status_code == 200:
-    print(data["message"])
+    print(data['message'])
   else:
     # do some trimming on the message
-    msg = data["errorMessage"].replace(args.key, '***').strip()
+    msg = data['errorMessage'].replace(args.key, '***').strip()
     print(f'error: failed to upload:\n{textwrap.indent(msg, " " * 7)}')
     sys.exit(1)
+
 
 if __name__ == '__main__':
   args = parse_arguments()
   strings = get_strings(args)
 
   if args.dry:
-    for key, value in strings.items():
-      print(f'L[{json.dumps(key)}] = {json.dumps(value)}')
+    for s in strings:
+      print(s)
   else:
     upload_strings(args, strings)

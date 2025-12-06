@@ -1,1 +1,2 @@
 requests
+luaparser @ git+https://github.com/boolangery/py-lua-parser@d355a1fa1eac7620c8d255c33b4e504dd0158424

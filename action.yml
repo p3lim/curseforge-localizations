@@ -16,8 +16,6 @@ inputs:
     description: Namespace to upload to
   exclude:
     description: List of file patterns to exclude
-  string_pattern:
-    description: Custom regex pattern to use
 runs:
   using: composite
   steps:
@@ -31,10 +29,12 @@ runs:
     - name: Run script
       shell: bash
       run: |
-        python3 "${{ github.action_path }}/update.py" \
-          --id "${{ inputs.project_id }}" \
-          --lang "${{ inputs.base_lang }}" \
-          --missing "${{ inputs.handle_missing }}" \
-          --namespace "${{ inputs.namespace }}" \
-          --pattern "${{ inputs.string_pattern }}" \
-          --exclude "${{ inputs.exclude }}"
+        args=()
+        [ -n "${{ inputs.project_id }}" ] && args+=(--id "${{ inputs.project_id }}")
+        [ -n "${{ inputs.base_lang }}" ] && args+=(--lang "${{ inputs.base_lang }}")
+        [ -n "${{ inputs.handle_missing }}" ] && args+=(--missing "${{ inputs.handle_missing }}")
+        [ -n "${{ inputs.namespace }}" ] && args+=(--namespace "${{ inputs.namespace }}")
+        while read -r exclude; do
+          args+=(--exclude "$exclude")
+        done < <(echo "${{ inputs.exclude }}" | head -c -1)
+        python3 "${{ github.action_path }}/update.py" "${args[@]}"
